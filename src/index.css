@@ -1,1 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Bellefair&family=Momo+Trust+Display&display=swap");
+
 @import "tailwindcss";
+
+@theme inline {
+  --font-family-bellefair: "Bellefair", serif;
+  --font-family-momo: "Momo Trust Display", sans-serif;
+}

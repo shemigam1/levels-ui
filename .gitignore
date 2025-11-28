@@ -1,1 +1,3 @@
 node_modules
+# Generated TanStack Router file
+src/routeTree.gen.ts
