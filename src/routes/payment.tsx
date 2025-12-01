@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router'
 import { usePaystackPayment } from 'react-paystack';
+import { useForm } from 'react-hook-form';
+import { useBooking } from '../context/BookingContext';
+
 
 
 export const Route = createFileRoute('/payment')({
@@ -10,11 +13,26 @@ export const Route = createFileRoute('/payment')({
 
 function RouteComponent() {
 
+  const { selectedPackage, userInfo } = useBooking();
 
-  const amount = 5000; // 5,000 Naira
-  const [email, setEmail] = useState("");
+
+  const amount = selectedPackage?.price || 100;
   const [isVerifying, setIsVerifying] = useState(false);
 
+  type PaymentFormValues = {
+    email: string;
+  };
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid }
+  } = useForm<PaymentFormValues>({
+    mode: "onChange"
+  });
+
+  const email = watch("email");
 
 
 
@@ -68,6 +86,15 @@ function RouteComponent() {
 
   const initializePayment = usePaystackPayment(config);
 
+  const onPayClick = () => {
+    initializePayment({ onSuccess, onClose });
+  };
+
+  const getPackageLabel = (type?: string) => {
+    if (!type) return "No Plan Selected";
+    return type.charAt(0).toUpperCase() + type.slice(1) + " Plan";
+  };
+
 
   return <div>
     <div className="min-h-screen bg-gray-50 text-white py-8 px-4">
@@ -103,15 +130,30 @@ function RouteComponent() {
                   className="w-full h-full object-cover"
                 />
               </div>
+
               <div className="space-y-3 text-sm">
+                {/* 1. Plan Name */}
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Space</span>
-                  <span className="font-medium text-gray-500">Space (A2)</span>
+                  <span className="text-gray-500">Selected Plan</span>
+                  <span className="font-bold text-gray-900">
+                    {getPackageLabel(selectedPackage?.type)}
+                  </span>
                 </div>
+
+                {/* 2. Guest Name */}
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Total Due</span>
-                  <span className="font-medium text-gray-500">₦{amount.toLocaleString()}</span>
+                  <span className="text-gray-500">Reserved For</span>
+                  <span className="font-bold text-gray-900 capitalize">
+                    {userInfo?.name || "Guest"}
+                  </span>
                 </div>
+                {/* 5. Total Price with Word Fallback */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 text-base">Total Due</span>
+                    <span className={`font-bold text-gray-900 ${amount > 0 ? "text-green-700" : "text-gray-400"}`}>
+                        {amount > 0 ? `₦${amount.toLocaleString()}` : "Select a Plan"}
+                    </span>
+                  </div>
               </div>
             </div>
           </div>
@@ -122,30 +164,46 @@ function RouteComponent() {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all duration-300 h-full hover:-translate-y-2 hover:shadow-2xl">
               <h3 className="text-lg font-bold mb-4">Confirm Details</h3>
 
+              <form onSubmit={handleSubmit(onPayClick)}>
 
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="text-black w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-green-500"
-                />
-                <p className="text-xs text-gray-400 mt-1">We'll send your booking confirmation here.</p>
-              </div>
+                <div className="mb-4">
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className={`text-black w-full border p-3 rounded-lg focus:outline-none transition-all
+                      ${errors.email ? 'border-red-500 focus:border-red-500 bg-red-50' : 'border-gray-300 focus:border-green-500'
+                      }
+                    `}
+                    {...register("email", {
+                      required: "Email address is required",
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Please enter a valid email address"
+                      }
+                    })}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">We'll send your booking confirmation here.</p>
+                </div>
 
 
-              <button
-                onClick={() => {
-                  if (!email) return alert("Please enter an email");
-                  initializePayment({ onSuccess, onClose })
-                }}
-                disabled={isVerifying}
-                className="w-full mt-13 bg-green-800 hover:bg-green-900 text-white py-4 rounded-lg font-bold hover:bg-gray-800 transition-colors flex justify-center items-center gap-2"
-              >
-                {isVerifying ? "Verifying..." : `Pay ₦${amount.toLocaleString()}`}
-              </button>
+                <button
+                  type="submit"
+                  disabled={!isValid}
+                  className={`w-full mt-8 text-white py-4 rounded-lg font-bold transition-colors flex justify-center items-center gap-2
+                      ${(!isValid)
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-green-800 hover:bg-green-900 shadow-md'
+                    }
+                    `}
+                >
+                  {isVerifying ? "Verifying..." : `Pay ₦${amount.toLocaleString()}`}
+                </button>
+              </form>
+
 
 
             </div>

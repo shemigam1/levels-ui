@@ -3,18 +3,20 @@ import ReactDOM from "react-dom/client";
 import React from "react";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen"; // will be auto-generated
+import { BookingProvider } from './context/BookingContext'
+
 
 
 function NotFound() {
   return <div>404 — Page Not Found</div>
 }
 
-const router = createRouter({ 
+const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFound,
- });
+});
 
- declare module '@tanstack/react-router' {
+declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
@@ -22,6 +24,9 @@ const router = createRouter({
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <BookingProvider>
+      <RouterProvider router={router} />
+    </BookingProvider>
+
   </React.StrictMode>
 );
