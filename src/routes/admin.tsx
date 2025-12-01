@@ -12,6 +12,7 @@ import { mockUsers, mockBookings } from "../data";
 import { BookingRow } from "../components/BookingRow";
 import { StatCard } from "../components/statCard";
 import { UserRow } from "../components/UserRow";
+import nithub from "../assets/nithub-image.png";
 
 export const Route = createFileRoute("/admin")({
   component: Admin,
@@ -27,8 +28,7 @@ function Admin() {
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.spaceName.toLowerCase().includes(searchTerm.toLowerCase());
+      booking.userEmail.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filterStatus === "all" || booking.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -103,27 +103,22 @@ function Admin() {
 
   return (
     <div className="min-h-screen w-full relative">
-      {/* Azure Depths */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%)",
-        }}
-      />
-      <div className=" bg-gray-50 ">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+      <div className="bg-gray-100">
+        {/* Nav */}
+        <div className=" border-b w-full border-gray-200">
+          <div className=" px-4 sm:px-6  lg:px-20 py-3 bg-gray-50">
+            <div className="flex w-full items-start bg-gray-50">
+              {/* Logo */}
+              <img
+                src={nithub}
+                className="h-18 w-auto object-contain"
+                alt="logo"
+              />
+              <div className="flex flex-col text-center w-full">
+                <h1 className="text-xl sm:text-2xl md:text-2xl font-bold text-gray-900">
                   Admin Dashboard
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm md:text-lg">
                   Manage bookings and workspace users
                 </p>
               </div>
@@ -133,8 +128,8 @@ function Admin() {
 
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          {/* Total Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <StatCard
               icon={Calendar}
               label="Total Bookings"
@@ -157,21 +152,13 @@ function Admin() {
                 .length.toString()}
               color="yellow"
             />
-            <StatCard
-              icon={Users}
-              label="Active Users"
-              value={users
-                .filter((u) => u.status === "active")
-                .length.toString()}
-              color="purple"
-            />
           </div>
 
           {/* Tabs */}
           <div className="mb-6 flex gap-4 border-b border-gray-200">
             <button
               onClick={() => setActiveTab("bookings")}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2 font-medium cursor-pointer border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "bookings"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-600 hover:text-gray-900"
@@ -182,7 +169,7 @@ function Admin() {
             </button>
             <button
               onClick={() => setActiveTab("users")}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2 font-medium cursor-pointer border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "users"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-600 hover:text-gray-900"
@@ -211,10 +198,18 @@ function Admin() {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Status</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-                <option value="cancelled">Cancelled</option>
+                <option className="bg-slate-200" value="all">
+                  All Status
+                </option>
+                <option className="bg-slate-200" value="confirmed">
+                  Confirmed
+                </option>
+                <option className="bg-slate-200" value="pending">
+                  Pending
+                </option>
+                <option className="bg-slate-200" value="cancelled">
+                  Cancelled
+                </option>
               </select>
             )}
           </div>
@@ -224,30 +219,24 @@ function Admin() {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-linear-to-r from-slate-100 to-slate-200 border-b-2 w-full border-slate-300">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         ID
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         User
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Space
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
+                        Payment Plan
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Date & Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Duration
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Price
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Actions
                       </th>
                     </tr>
@@ -281,31 +270,20 @@ function Admin() {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-linear-to-r from-slate-100 to-slate-200 border-b-2 w-full border-slate-300">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Company
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Join Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Bookings
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-4 text-left text-sm font-black text-slate-800">
                         Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                        Actions
                       </th>
                     </tr>
                   </thead>
