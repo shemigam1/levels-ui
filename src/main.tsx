@@ -4,7 +4,21 @@ import React from "react";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen"; // will be auto-generated
 
-const router = createRouter({ routeTree });
+
+function NotFound() {
+  return <div>404 — Page Not Found</div>
+}
+
+const router = createRouter({ 
+  routeTree,
+  defaultNotFoundComponent: NotFound,
+ });
+
+ declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
