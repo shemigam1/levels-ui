@@ -15,11 +15,9 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  X,
 } from "lucide-react";
-import nithub from "../assets/nithub-image.png";
 import { useNavigate } from "@tanstack/react-router";
+import { Header } from "../components/header";
 
 export const Route = createFileRoute("/")({
   component: Homepage,
@@ -148,7 +146,6 @@ const testimonials: Testimonial[] = [
 ];
 
 function Homepage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [currentTestimonial, setCurrentTestimonial] = useState<number>(0);
 
   const nextTestimonial = () => {
@@ -160,6 +157,7 @@ function Homepage() {
       (prev) => (prev - 1 + testimonials.length) % testimonials.length
     );
   };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -173,87 +171,9 @@ function Homepage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <div className=" border-b w-full fixed top-0 right-0 left-0 z-10  border-gray-200">
-        <div className=" px-4 sm:px-6  lg:px-20 py-3 bg-gray-50">
-          <div className="flex w-full items-center justify-between bg-gray-50">
-            {/* Logo */}
-            <img
-              src={nithub}
-              className="h-18 w-auto object-contain"
-              alt="logo"
-            />
-            <div className="hidden md:flex items-center space-x-8">
-              <button
-                onClick={() => scrollToSection("features")}
-                className="text-slate-600 hover:text-blue-600 transition-colors font-medium"
-              >
-                Features
-              </button>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                className="text-slate-600 hover:text-blue-600 transition-colors font-medium"
-              >
-                Pricing
-              </button>
-              <button
-                onClick={() => scrollToSection("testimonials")}
-                className="text-slate-600 hover:text-blue-600 transition-colors font-medium"
-              >
-                Testimonials
-              </button>
-              <button
-                onClick={() => navigate({ to: "/register" })}
-                className="px-6 py-2 bg-slate-800 hover:opacity-90 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md hover:shadow-lg"
-              >
-                Register
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-200">
-            <div className="px-4 py-4 space-y-3">
-              <button
-                onClick={() => scrollToSection("features")}
-                className="block w-full text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors font-medium"
-              >
-                Features
-              </button>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                className="block w-full text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors font-medium"
-              >
-                Pricing
-              </button>
-              <button
-                onClick={() => scrollToSection("testimonials")}
-                className="block w-full text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors font-medium"
-              >
-                Testimonials
-              </button>
-              <button className="w-full px-6 py-2 bg-slate-800 hover:opacity-90 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md">
-                Register
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <Header />
       {/* Hero Section */}
-      <section className="pt-14 b-16 px-4 sm:px-6 lg:px-18">
+      <section className="pt-14 b-16 px-4 sm:px-6 lg:px-18 mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -443,16 +363,6 @@ function Homepage() {
                       </li>
                     ))}
                   </ul>
-
-                  <button
-                    className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
-                      plan.popular
-                        ? "bg-blue-700 text-white hover:opacity-90"
-                        : "bg-slate-800 text-white hover:bg-slate-900"
-                    }`}
-                  >
-                    Choose Plan
-                  </button>
                 </div>
               </div>
             ))}

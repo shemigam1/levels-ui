@@ -1,171 +1,132 @@
-import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router'
-import { usePaystackPayment } from 'react-paystack';
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Lock, X } from "lucide-react";
+import paystack from "../assets/paystack.jpg";
+import { useBooking } from "../context/BookingContext";
+import { useNavigate } from "@tanstack/react-router";
 
+export const Route = createFileRoute("/payment")({
+  component: Payment,
+});
 
-export const Route = createFileRoute('/payment')({
-  component: RouteComponent,
-})
-
-
-function RouteComponent() {
-
-
-  const amount = 5000; // 5,000 Naira
-  const [email, setEmail] = useState("");
+function Payment() {
+  const { selectedPackage, userInfo } = useBooking();
+  const amount = selectedPackage?.price || 5000;
+  const [email, setEmail] = useState(userInfo?.email || "");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(true);
 
-
-
-
-  // This function runs AFTER Paystack popup closes successfully
-  const onSuccess = async (referenceObj: any) => {
+  // PAYSTACK INLINE PAYMENT FUNCTION
+  const verifyPayment = async (response: any) => {
     setIsVerifying(true);
 
-
-
-
     try {
-      // Send the reference to the backend
-      const response = await fetch('http://localhost:3000/payments/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reference: referenceObj.reference })
+      const res = await fetch("http://localhost:3000/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: response.reference }),
       });
 
-
-      const data = await response.json();
-
+      const data = await res.json();
 
       if (data.status === true) {
         alert("Booking Confirmed! Receipt sent to " + email);
       } else {
         alert("Verification failed. Please contact support.");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       alert("Error verifying payment");
     } finally {
       setIsVerifying(false);
     }
   };
 
+  const payWithPaystack = () => {
+    if (!email) {
+      alert("Please enter your email");
+      return;
+    }
 
-  const onClose = () => {
-    alert("Payment cancelled.");
+    const handler = (window as any).PaystackPop.setup({
+      key: "pk_test_3c5f3c7aa7f157bcdd7428a30cd327cc8522b244",
+      email: email,
+      amount: amount * 100,
+      ref: new Date().getTime().toString(),
+
+      callback: function (response: any) {
+        verifyPayment(response);
+      },
+
+      onClose: function () {
+        alert("Payment cancelled.");
+      },
+    });
+
+    handler.openIframe();
   };
+  const navigate = useNavigate();
 
-
-  const config = {
-    reference: (new Date()).getTime().toString(),
-    email: email,
-    amount: amount * 100,
-    publicKey: 'pk_test_3c5f3c7aa7f157bcdd7428a30cd327cc8522b244',
-    onSuccess: onSuccess,
-    onClose: onClose
-  };
-
-
-  const initializePayment = usePaystackPayment(config);
-
-
-  return <div>
-    <div className="min-h-screen bg-gray-50 text-white py-8 px-4">
-
-
-
-
-      {/* HEADER */}
-
-
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8 bg-gradient-to-r from-green-600 to-emerald-900 p-6 rounded-2xl shadow-2xl text-white text-center border border-green-500/30">
-          <h1 className="text-3xl md:text-4xl font-bold font-momo mb-2 tracking-wide">
-            Make Payment
-          </h1>
-          <p className="text-green-100 font-bellefair text-lg md:text-xl opacity-90">
-            Finalize your booking for the Workspace
-          </p>
-        </div>
-
-
-        <div className="flex flex-col md:flex-row gap-6 group">
-
-
-          {/* LEFT COL: Summary */}
-          <div className="w-full md:w-1/2">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-              <h3 className="text-lg font-bold mb-4 text-gray-800">Booking Summary</h3>
-              <div className="h-32 w-full bg-gray-200 rounded-lg overflow-hidden mb-4 flex items-center justify-center text-gray-400">
-                <img
-                  alt="Working Space"
-                  src="/nithub-space.webp"
-                  className="w-full h-full object-cover"
-                />
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      {showPaymentModal && (
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+          {/* Header */}
+          <div className="bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-500  flex items-center justify-center">
+                <img src={paystack} alt="paystack-logo" />
               </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Space</span>
-                  <span className="font-medium text-gray-500">Space (A2)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Total Due</span>
-                  <span className="font-medium text-gray-500">₦{amount.toLocaleString()}</span>
+              <div className="text-right">
+                <div className="text-sm text-gray-600">{email}</div>
+                <div className="text-lg font-semibold text-green-600">
+                  Pay NGN {amount.toLocaleString()}
                 </div>
               </div>
             </div>
+            <button
+              onClick={() => navigate({ to: "/register" })}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={24} />
+            </button>
           </div>
 
-
-          {/* RIGHT COL: Action */}
-          <div className="w-full md:w-1/2 order-1 md:order-2">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all duration-300 h-full hover:-translate-y-2 hover:shadow-2xl">
-              <h3 className="text-lg font-bold mb-4">Confirm Details</h3>
-
-
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="text-black w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-green-500"
-                />
-                <p className="text-xs text-gray-400 mt-1">We'll send your booking confirmation here.</p>
-              </div>
-
-
-              <button
-                onClick={() => {
-                  if (!email) return alert("Please enter an email");
-                  initializePayment({ onSuccess, onClose })
-                }}
-                disabled={isVerifying}
-                className="w-full mt-13 bg-green-800 hover:bg-green-900 text-white py-4 rounded-lg font-bold hover:bg-gray-800 transition-colors flex justify-center items-center gap-2"
-              >
-                {isVerifying ? "Verifying..." : `Pay ₦${amount.toLocaleString()}`}
-              </button>
-
-
+          {/* Email Input Section */}
+          <div className="px-6 py-8">
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-gray-600 uppercase mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="motoyosilove@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg focus:outline-none focus:border-green-500 focus:bg-white transition-colors text-gray-900"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                We'll send your booking confirmation here.
+              </p>
             </div>
+
+            <button
+              onClick={payWithPaystack}
+              disabled={isVerifying}
+              className="w-full bg-green-700 hover:bg-green-800 text-white py-3.5 rounded-lg font-semibold transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              {isVerifying ? "Verifying..." : `Pay ₦${amount.toLocaleString()}`}
+            </button>
           </div>
 
-
+          {/* Footer */}
+          <div className="bg-gray-50 px-6 py-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+            <Lock size={14} />
+            <span>Secured by</span>
+            <span className="font-bold text-gray-900">paystack</span>
+          </div>
         </div>
-      </div>
-      <div className="mt-10 mb-6 flex justify-center">
-        <img
-          alt="Secured by Paystack"
-          src="/Paystack-logo.jpg"
-          width="150"
-          height="70"
-          loading="lazy"
-        />
-      </div>
+      )}
     </div>
-  </div>
+  );
 }
-
-
-

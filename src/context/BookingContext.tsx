@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 export interface Package {
-  type: 'daily' | 'weekly' | 'monthly';
+  type: "day" | "week" | "month";
   price: number;
 }
 
@@ -24,14 +24,14 @@ const BookingContext = createContext<BookingContextType | undefined>(undefined);
 export const BookingProvider = ({ children }: { children: ReactNode }) => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    name: '',
-    email: '',
-    phone: ''
+    name: "",
+    email: "",
+    phone: "",
   });
 
   const clearBooking = () => {
     setSelectedPackage(null);
-    setUserInfo({ name: '', email: '', phone: '' });
+    setUserInfo({ name: "", email: "", phone: "" });
   };
 
   return (
@@ -41,7 +41,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         setSelectedPackage,
         userInfo,
         setUserInfo,
-        clearBooking
+        clearBooking,
       }}
     >
       {children}
@@ -52,7 +52,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
 export const useBooking = () => {
   const context = useContext(BookingContext);
   if (context === undefined) {
-    throw new Error('useBooking must be used within a BookingProvider');
+    throw new Error("useBooking must be used within a BookingProvider");
   }
   return context;
 };
