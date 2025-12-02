@@ -14,14 +14,14 @@ export const StatCard: React.FC<StatCardProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+    <div className="bg-white border-slate-300 flex flex-col items-center border p-6 rounded-lg shadow hover:shadow-md transition-shadow">
       <div
-        className={`w-12 h-12 rounded-lg ${colorMap[color]} flex items-center justify-center mb-4`}
+        className={`w-12 h-12 rounded-lg  ${colorMap[color]} flex items-center justify-center mb-4`}
       >
         <Icon className="w-6 h-6" />
       </div>
       <p className="text-gray-600 text-sm font-medium">{label}</p>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
+      <p className="md:text-3xl text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
 };

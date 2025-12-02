@@ -3,7 +3,6 @@ export interface UserType {
   name: string;
   email: string;
   phone: string;
-  status: "active" | "inactive";
 }
 
 export interface Booking {
@@ -11,13 +10,7 @@ export interface Booking {
   userId: string;
   userName: string;
   userEmail: string;
-  spaceId: string;
-  spaceName: string;
-  bookingDate: string;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  capacity: number;
+  paymentPlan: string;
   price: number;
   status: "confirmed" | "pending" | "cancelled";
   createdAt: string;

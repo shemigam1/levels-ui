@@ -2,11 +2,7 @@ import { useState } from "react";
 import type { UserRowProps } from "../types";
 import { Edit, Mail, MoreVertical, Phone, Trash2, User } from "lucide-react";
 
-export const UserRow: React.FC<UserRowProps> = ({
-  user,
-  onDelete,
-  getStatusBadge,
-}) => {
+export const UserRow: React.FC<UserRowProps> = ({ user, onDelete }) => {
   const [showActions, setShowActions] = useState(false);
 
   return (
@@ -32,7 +28,6 @@ export const UserRow: React.FC<UserRowProps> = ({
         </div>
       </td>
 
-      <td className="px-6 py-4 text-sm">{getStatusBadge(user.status)}</td>
       <td className="px-6 py-4 text-sm">
         <div className="relative">
           <button

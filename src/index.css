@@ -6,3 +6,7 @@
   --font-family-bellefair: "Bellefair", serif;
   --font-family-momo: "Momo Trust Display", sans-serif;
 }
+
+button {
+  cursor: pointer;
+}

@@ -1,13 +1,6 @@
 import { useState } from "react";
 import type { BookingRowProps } from "../types";
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  MoreVertical,
-  Trash2,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, MoreVertical, Trash2 } from "lucide-react";
 
 export const BookingRow: React.FC<BookingRowProps> = ({
   booking,
@@ -17,7 +10,7 @@ export const BookingRow: React.FC<BookingRowProps> = ({
   const [showActions, setShowActions] = useState(false);
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
+    <tr className="hover:bg-gray-50 transition-colors ">
       <td className="px-6 py-4 text-sm font-mono font-medium text-blue-600">
         {booking.id}
       </td>
@@ -27,28 +20,13 @@ export const BookingRow: React.FC<BookingRowProps> = ({
           <span className="text-gray-600 text-xs">{booking.userEmail}</span>
         </div>
       </td>
+
       <td className="px-6 py-4 text-sm">
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">{booking.spaceName}</span>
-        </div>
+        <span className="text-black text-sm">{booking.paymentPlan}</span>
       </td>
-      <td className="px-6 py-4 text-sm">
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">
-            {booking.bookingDate}
-          </span>
-          <span className="text-gray-600 text-xs flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {booking.startTime} - {booking.endTime}
-          </span>
-        </div>
-      </td>
-      <td className="px-6 py-4 text-sm font-medium text-gray-900">
-        {booking.duration}h
-      </td>
+
       <td className="px-6 py-4 text-sm font-medium text-gray-900 flex items-center gap-1">
-        <DollarSign className="w-4 h-4" />
-        {booking.price}
+        &#8358;{booking.price}
       </td>
       <td className="px-6 py-4 text-sm">{getStatusBadge(booking.status)}</td>
       <td className="px-6 py-4 text-sm">
