@@ -21,5 +21,6 @@ export default function App() {
         <RegistrationForm onPrevious={handlePrevious} onSubmit={handleSubmit} />
       )}
     </>
+    </>
   );
 }
