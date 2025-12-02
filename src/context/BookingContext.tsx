@@ -9,6 +9,18 @@ export interface UserInfo {
   name: string;
   email: string;
   phone: string;
+  
+}
+
+export interface Booking {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  type_of_booking: string; // "day" | "week" | "month"
+  price: number;
+  status?: "pending" | "confirmed" | "cancelled";
 }
 
 interface BookingContextType {
@@ -17,6 +29,8 @@ interface BookingContextType {
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
   clearBooking: () => void;
+  bookings: Booking[];
+  setBookings: (bookings: Booking[]) => void;
 }
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
@@ -33,6 +47,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setSelectedPackage(null);
     setUserInfo({ name: "", email: "", phone: "" });
   };
+  const [bookings, setBookings] = useState<Booking[]>([]);
 
   return (
     <BookingContext.Provider
@@ -42,6 +57,8 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         userInfo,
         setUserInfo,
         clearBooking,
+        bookings,
+        setBookings
       }}
     >
       {children}

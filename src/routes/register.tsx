@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useBooking } from "../context/BookingContext";
+import { type UserInfo, useBooking } from "../context/BookingContext";
 import { useForm } from "react-hook-form";
 import App from "../App";
 import axios from "axios";
+
 
 export const Route = createFileRoute("/register")({
   component: App,
@@ -11,8 +12,8 @@ export const Route = createFileRoute("/register")({
 
 // Package Selection UI Component
 export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
-  const { selectedPackage, setSelectedPackage, clearBooking } = useBooking();
-  const [localSelection, setLocalSelection] = useState<
+  const { selectedPackage, setSelectedPackage  } = useBooking();
+  const [lengthSelection, setLengthSelection] = useState<
     "day" | "week" | "month" | null
   >(selectedPackage?.type || null);
 
@@ -37,14 +38,12 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
     },
   ];
 
-  const handleCancel = () => {
-    setLocalSelection(null);
-    clearBooking();
-  };
+  const navigate = useNavigate();
+
 
   const handleNext = () => {
-    if (localSelection) {
-      const pkg = packages.find((p) => p.type === localSelection);
+    if (lengthSelection) {
+      const pkg = packages.find((p) => p.type === lengthSelection);
       if (pkg) {
         setSelectedPackage({ type: pkg.type, price: pkg.price });
         onNext();
@@ -53,11 +52,11 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 mt-24">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-4xl w-full m-auto pt-8">
         {/* Centered Box Container */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 md:p-12">
-          {/* Header with Logo */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 md:p-12 mt-26">
+        
           <div className="mb-8 text-center">
             <h1 className="mb-3 text-lg md:text-2xl text-blue-800 font-bold">
               Choose Your Space
@@ -74,9 +73,9 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
             {packages.map((pkg) => (
               <div
                 key={pkg.type}
-                onClick={() => setLocalSelection(pkg.type)}
+                onClick={() => setLengthSelection(pkg.type)}
                 className={`bg-linear-to-br rounded-xl shadow-md p-6 cursor-pointer transition-all border-2 ${
-                  localSelection === pkg.type
+                  lengthSelection === pkg.type
                     ? "border-indigo-500 shadow-xl from-indigo-50 to-purple-50 scale-105"
                     : "border-transparent hover:border-indigo-200 from-white to-gray-50 hover:shadow-lg"
                 }`}
@@ -85,12 +84,12 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
                   <h3 className="text-gray-800">{pkg.label}</h3>
                   <div
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      localSelection === pkg.type
+                      lengthSelection === pkg.type
                         ? "border-indigo-500 bg-indigo-500"
                         : "border-gray-300"
                     }`}
                   >
-                    {localSelection === pkg.type && (
+                    {lengthSelection === pkg.type && (
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -121,16 +120,16 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
           {/* Buttons */}
           <div className="flex justify-between items-center pt-4 border-t border-gray-200">
             <button
-              onClick={handleCancel}
+              onClick={()=>  navigate({ to: "/" })}
               className="px-8 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
             >
-              Cancel
+              Back
             </button>
             <button
               onClick={handleNext}
-              disabled={!localSelection}
+              disabled={!lengthSelection}
               className={`px-8 py-3 rounded-xl transition-all font-medium ${
-                localSelection
+                lengthSelection
                   ? "bg-slate-800 text-white shadow-lg hover:opacity-90"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
@@ -152,7 +151,7 @@ export const RegistrationForm = ({
   onPrevious: () => void;
   onSubmit: () => void;
 }) => {
-  const { userInfo, setUserInfo, selectedPackage } = useBooking();
+  const { userInfo, setUserInfo, selectedPackage, bookings, setBookings } = useBooking();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -169,35 +168,34 @@ export const RegistrationForm = ({
     },
   });
 
-  const onFormSubmit = async (data: {
-    name: string;
-    email: string;
-    phone: string;
-  }) => {
-    if (!selectedPackage) {
-      alert("Please select a package before proceeding.");
-      return;
-    }
-
+  const onFormSubmit = async (data: UserInfo) => {
+    
     setUserInfo(data);
 
     // Prepare booking data for backend
     const bookingData = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      date: new Date().toISOString(), // can be customized later
-      type_of_booking: selectedPackage.type,
+      ...data,
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(), 
+      price: selectedPackage?.price,
+      type_of_booking: selectedPackage?.type,
     };
-
+    
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3000/", bookingData);
+
+      const response = await axios.post("https://levels-server-hipc.onrender.com", bookingData);
+
       setLoading(false);
 
       if (response.data.success) {
+
         console.log("Booking successful:", response.data.data);
-        onSubmit(); // proceed to next step (e.g., payment)
+
+        setBookings([...bookings, response.data.data])
+
+        navigate({ to: "/payment" });
+        onSubmit(); 
       } else {
         alert("Booking failed: " + response.data.error);
       }
@@ -212,8 +210,10 @@ export const RegistrationForm = ({
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
       <div className="max-w-2xl w-full">
         <div className="bg-white/80 backdrop-blur-sm mt-20 rounded-2xl shadow-xl p-1 md:p-12">
+
           <form onSubmit={handleSubmit(onFormSubmit)}>
             <div className="space-y-4">
+            <h1 className="mb-6 text-xl text-gray-800 text-center ">Allocation Form</h1>
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-gray-700 mb-2">
@@ -315,7 +315,6 @@ export const RegistrationForm = ({
               </button>
               <button
                 type="submit"
-                onClick={() => navigate({ to: "/payment" })}
                 disabled={!isValid || loading}
                 className={`px-8 py-3 rounded-xl transition-all font-medium ${
                   isValid

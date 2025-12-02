@@ -2,15 +2,18 @@ import { useState } from "react";
 import { PackageSelection, RegistrationForm } from "./routes/register";
 
 export default function App() {
-  const [currentStep, setCurrentStep] = useState<"packages" | "register">(
+  const [currentStep, setCurrentStep] = useState<"packages" | "register" | "payment">(
     "packages"
   );
 
   const handleNext = () => setCurrentStep("register");
+
   const handlePrevious = () => setCurrentStep("packages");
+  
   const handleSubmit = () => {
     alert("Registration completed successfully!");
-    setCurrentStep("packages");
+    setCurrentStep("payment");
+    
   };
 
   return (
