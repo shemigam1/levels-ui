@@ -1,10 +1,14 @@
-import  { useState } from 'react';
-import { BookingProvider } from './context/BookingContext';
+import { useState } from 'react';
 import { Header, PackageSelection, RegistrationForm } from './routes/register';
+import { useNavigate } from '@tanstack/react-router'; // 1. Import navigation hook
+
 
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState<'packages' | 'register'>('packages');
+
+  const navigate = useNavigate();
+
 
   const handleNext = () => {
     setCurrentStep('register');
@@ -15,18 +19,17 @@ export default function App() {
   };
 
   const handleSubmit = () => {
-    alert('Registration completed successfully!');
-    setCurrentStep('packages');
+    navigate({ to: '/payment' });
   };
 
   return (
-    <BookingProvider>
+    <> 
       <Header/>
       {currentStep === 'packages' ? (
         <PackageSelection onNext={handleNext} />
       ) : (
         <RegistrationForm onPrevious={handlePrevious} onSubmit={handleSubmit} />
       )}
-    </BookingProvider>
+    </>
   );
 }

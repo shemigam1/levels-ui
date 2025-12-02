@@ -276,7 +276,7 @@ export const RegistrationForm = ({ onPrevious, onSubmit }: { onPrevious: () => v
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Proceed to Register
+                Proceed to Payment
               </button>
             </div>
           </form>
