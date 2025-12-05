@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import nithub from "../assets/nithub.jpeg";
+import unnLogo from "../assets/unnLogo.png";
 import { useState } from "react";
 
 export const Header = () => {
@@ -17,10 +18,14 @@ export const Header = () => {
 
   return (
     <div className=" border-b w-full fixed top-0 right-0 left-0 z-10  border-gray-200">
-      <div className=" px-4 sm:px-6  lg:px-20 py-3 bg-white">
+      <div className=" px-4 sm:px-6  py-3 bg-white">
         <div className="flex w-full items-center justify-between ">
           {/* Logo */}
-          <img src={nithub} className="h-18 w-auto object-contain" alt="logo" />
+          <div className="flex">
+         <img src ={unnLogo} alt="unn logo" className="w-12 h-14 object-contain mr-4" />
+         <img src ={nithub} alt="nithub logo" className="h-12 object-contain"/>
+         </div>
+         
           <div className="hidden md:flex items-center space-x-8">
             <button
               onClick={() => scrollToSection("features")}
