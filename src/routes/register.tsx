@@ -9,6 +9,28 @@ export const Route = createFileRoute("/register")({
   component: App,
 });
 
+// Custom Modal component to replace alert()
+const CustomAlert = ({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm text-center">
+      <h3 className="text-xl font-bold text-red-600 mb-4">Notification</h3>
+      <p className="text-gray-700 mb-6">{message}</p>
+      <button
+        onClick={onClose}
+        className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+);
+
 // Package Selection UI Component
 export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
   const { selectedPackage, setSelectedPackage, clearBooking } = useBooking();
@@ -155,6 +177,7 @@ export const RegistrationForm = ({
   const { userInfo, setUserInfo, selectedPackage } = useBooking();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for custom alert
 
   const {
     register,
@@ -169,47 +192,83 @@ export const RegistrationForm = ({
     },
   });
 
+  // register.tsx - RegistrationForm component
+
   const onFormSubmit = async (data: {
     name: string;
     email: string;
     phone: string;
   }) => {
     if (!selectedPackage) {
-      alert("Please select a package before proceeding.");
+      setErrorMessage("Please select a package before proceeding.");
       return;
     }
 
     setUserInfo(data);
 
-    // Prepare booking data for backend
-    const bookingData = {
+    // Prepare data for User Registration (Stage 1)
+    const registrationData = {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      date: new Date().toISOString(), // can be customized later
+      // In a real app, you'd add: password: 'user-entered-password',
+    };
+
+    // Prepare data for Booking (Stage 2)
+    const bookingData = {
+      email: data.email, // Use email to look up the user/link the booking
+      date: new Date().toISOString(),
       type_of_booking: selectedPackage.type,
     };
 
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3000/", bookingData);
-      setLoading(false);
 
-      if (response.data.success) {
-        console.log("Booking successful:", response.data.data);
-        onSubmit(); // proceed to next step (e.g., payment)
+      // 1. 🔑 POST TO THE DEDICATED REGISTRATION ENDPOINT
+      const registerRes = await axios.post(
+        "http://localhost:3000/auth/register", // 💡 NEW ENDPOINT
+        registrationData
+      );
+
+      if (registerRes.data.success || registerRes.data.code === 409) {
+        // 409 means user already exists, which is fine for moving on
+        console.log("User registered/exists. Proceeding to booking...");
+
+        // 2. POST TO THE BOOKING ENDPOINT
+        // NOTE: Since your previous booking endpoint also handled user creation,
+        // we'll still use the root path for now, or update it to the new /bookings path.
+        const bookingRes = await axios.post(
+          "http://localhost:3000/bookings/",
+          bookingData
+        ); // 💡 Assuming main.ts change maps this to /bookings
+
+        if (bookingRes.data.success) {
+          console.log("Booking successful. Navigating to payment.");
+          onSubmit(); // This should now navigate to /payment
+        } else {
+          setErrorMessage("Booking failed: " + bookingRes.data.error);
+        }
       } else {
-        alert("Booking failed: " + response.data.error);
+        setErrorMessage("Registration failed: " + registerRes.data.error);
       }
     } catch (error: any) {
+      console.error("Transaction Error:", error);
+      setErrorMessage(
+        "An error occurred during registration/booking. Check server logs."
+      );
+    } finally {
       setLoading(false);
-      console.error(error);
-      alert("An error occurred while booking. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      {errorMessage && (
+        <CustomAlert
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
+      )}
       <div className="max-w-2xl w-full">
         <div className="bg-white/80 backdrop-blur-sm mt-20 rounded-2xl shadow-xl p-1 md:p-12">
           <form onSubmit={handleSubmit(onFormSubmit)}>
