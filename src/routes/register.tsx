@@ -221,7 +221,7 @@ export const RegistrationForm = ({
         navigate({ to: "/payment" });
         onSubmit();
       } else {
-        setErrorMessage("Registration failed: " + registerRes.data.error);
+        setErrorMessage("Registration failed: ");
       }
     } catch (error: any) {
       console.error("Transaction Error:", error);
