@@ -168,15 +168,23 @@ export const RegistrationForm = ({
     },
   });
 
+
+
+
   const onFormSubmit = async (data: UserInfo) => {
     
     setUserInfo(data);
+
+    const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1); // add 1 day
+const formattedDate = tomorrow.toISOString().split("T")[0]; // YYYY-MM-DD
+
 
     // Prepare booking data for backend
     const bookingData = {
       ...data,
       id: crypto.randomUUID(),
-      date: new Date().toISOString(), 
+      date: formattedDate, // future date in YYYY-MM-DD
       price: selectedPackage?.price,
       type_of_booking: selectedPackage?.type,
     };
@@ -184,10 +192,10 @@ export const RegistrationForm = ({
     try {
       setLoading(true);
 
-      const response = await axios.post("https://levels-server-hipc.onrender.com", bookingData);
+      const response = await axios.post("https://levels-server-hipc.onrender.com/", bookingData);
 
       setLoading(false);
-
+      
       if (response.data.success) {
 
         console.log("Booking successful:", response.data.data);
