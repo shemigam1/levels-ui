@@ -5,14 +5,35 @@ import { useForm } from "react-hook-form";
 import App from "../App";
 import axios from "axios";
 
-
 export const Route = createFileRoute("/register")({
   component: App,
 });
 
+// Custom Modal component to replace alert()
+const CustomAlert = ({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm text-center">
+      <h3 className="text-xl font-bold text-red-600 mb-4">Notification</h3>
+      <p className="text-gray-700 mb-6">{message}</p>
+      <button
+        onClick={onClose}
+        className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+);
+
 // Package Selection UI Component
 export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
-  const { selectedPackage, setSelectedPackage  } = useBooking();
+  const { selectedPackage, setSelectedPackage } = useBooking();
   const [lengthSelection, setLengthSelection] = useState<
     "day" | "week" | "month" | null
   >(selectedPackage?.type || null);
@@ -40,7 +61,6 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
 
   const navigate = useNavigate();
 
-
   const handleNext = () => {
     if (lengthSelection) {
       const pkg = packages.find((p) => p.type === lengthSelection);
@@ -56,7 +76,6 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
       <div className="max-w-4xl w-full m-auto pt-8">
         {/* Centered Box Container */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 md:p-12 mt-26">
-        
           <div className="mb-8 text-center">
             <h1 className="mb-3 text-lg md:text-2xl text-blue-800 font-bold">
               Choose Your Space
@@ -120,7 +139,7 @@ export const PackageSelection = ({ onNext }: { onNext: () => void }) => {
           {/* Buttons */}
           <div className="flex justify-between items-center pt-4 border-t border-gray-200">
             <button
-              onClick={()=>  navigate({ to: "/" })}
+              onClick={() => navigate({ to: "/" })}
               className="px-8 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
             >
               Back
@@ -151,9 +170,11 @@ export const RegistrationForm = ({
   onPrevious: () => void;
   onSubmit: () => void;
 }) => {
-  const { userInfo, setUserInfo, selectedPackage, bookings, setBookings } = useBooking();
+  const { userInfo, setUserInfo, selectedPackage, bookings, setBookings } =
+    useBooking();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for custom alert
 
   const {
     register,
@@ -168,11 +189,9 @@ export const RegistrationForm = ({
     },
   });
 
-
-
+  // register.tsx - RegistrationForm component
 
   const onFormSubmit = async (data: UserInfo) => {
-    
     setUserInfo(data);
 
     const tomorrow = new Date();
@@ -188,40 +207,52 @@ const formattedDate = tomorrow.toISOString().split("T")[0]; // YYYY-MM-DD
       price: selectedPackage?.price,
       type_of_booking: selectedPackage?.type,
     };
-    
+
     try {
       setLoading(true);
 
-      const response = await axios.post("https://levels-server-hipc.onrender.com/", bookingData);
+      const response = await axios.post(
+        "https://levels-server-hipc.onrender.com",
+        bookingData
+      );
 
       setLoading(false);
       
       if (response.data.success) {
-
         console.log("Booking successful:", response.data.data);
 
-        setBookings([...bookings, response.data.data])
+        setBookings([...bookings, response.data.data]);
 
         navigate({ to: "/payment" });
-        onSubmit(); 
+        onSubmit();
       } else {
-        alert("Booking failed: " + response.data.error);
+        setErrorMessage("Registration failed: ");
       }
     } catch (error: any) {
+      console.error("Transaction Error:", error);
+      setErrorMessage(
+        "An error occurred during registration/booking. Check server logs."
+      );
+    } finally {
       setLoading(false);
-      console.error(error);
-      alert("An error occurred while booking. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      {errorMessage && (
+        <CustomAlert
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
+      )}
       <div className="max-w-2xl w-full">
         <div className="bg-white/80 backdrop-blur-sm mt-20 rounded-2xl shadow-xl p-1 md:p-12">
-
           <form onSubmit={handleSubmit(onFormSubmit)}>
             <div className="space-y-4">
-            <h1 className="mb-6 text-xl text-gray-800 text-center ">Allocation Form</h1>
+              <h1 className="mb-6 text-xl text-gray-800 text-center ">
+                Allocation Form
+              </h1>
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-gray-700 mb-2">

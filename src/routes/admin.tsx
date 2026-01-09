@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Users,
   Calendar,
@@ -13,6 +13,7 @@ import { BookingRow } from "../components/BookingRow";
 import { StatCard } from "../components/statCard";
 import { UserRow } from "../components/UserRow";
 import nithub from "../assets/nithub-image.png";
+import axios from "axios";
 
 export const Route = createFileRoute("/admin")({
   component: Admin,
@@ -22,8 +23,81 @@ function Admin() {
   const [activeTab, setActiveTab] = useState<"bookings" | "users">("bookings");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [bookings, setBookings] = useState<Booking[]>(mockBookings);
-  const [users, setUsers] = useState<UserType[]>(mockUsers);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
+  // --- DATA FETCHING LOGIC ---
+  const fetchAdminData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("adminToken"); // Assuming JWT is stored here
+      if (!token) {
+        setError("Authentication token not found. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // 1. Fetch Bookings
+      const bookingsRes = await axios.get(
+        "http://localhost:3000/admin/bookings",
+        { headers }
+      );
+      if (bookingsRes.data.success) {
+        // NOTE: The backend stores raw data. We need to map it to the frontend model.
+        const fetchedBookings: Booking[] = bookingsRes.data.data.map(
+          (b: any) => ({
+            id: b._id, // MongoDB ID
+            userName: b.name,
+            userEmail: b.email,
+            type_of_booking: b.type_of_booking,
+            status: b.status || "pending", // Assuming default is pending
+            date: b.date,
+            phone: b.phone || "N/A",
+            price:
+              b.type_of_booking === "day"
+                ? 3000
+                : b.type_of_booking === "week"
+                  ? 30000
+                  : 90000, // Mocking price calculation
+          })
+        );
+        setBookings(fetchedBookings);
+      } else {
+        setError(bookingsRes.data.error || "Failed to fetch bookings.");
+      }
+
+      // 2. Fetch Users
+      const usersRes = await axios.get("http://localhost:3000/admin/users", {
+        headers,
+      });
+      if (usersRes.data.success) {
+        const fetchedUsers: UserType[] = usersRes.data.data.map((u: any) => ({
+          id: u._id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone || "N/A",
+          status: u.status || "active", // Assuming default is active
+        }));
+        setUsers(fetchedUsers);
+      } else {
+        setError(usersRes.data.error || "Failed to fetch users.");
+      }
+    } catch (e: any) {
+      console.error("Data Fetch Error:", e);
+      setError("Could not connect to the API or session expired.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, [fetchAdminData]);
+  // --- END DATA FETCHING LOGIC ---
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
